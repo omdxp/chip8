@@ -5,6 +5,7 @@ const CHIP8 = @import("chip8.zig").CHIP8;
 
 pub fn main() !void {
     var chip8: CHIP8 = undefined;
+    chip8.registers.v[0x0f] = 50;
     try chip8.memory.set(50, 'A');
     std.debug.print("Memory at index 50: {c}\n", .{try chip8.memory.get(50)});
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
