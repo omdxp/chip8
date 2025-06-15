@@ -1,7 +1,7 @@
 const config = @import("config.zig");
 
 inline fn is_memory_in_bounds(index: usize) bool {
-    return index >= 0 and index < config.CHIP8_MEMORY_SIZE;
+    return index < config.CHIP8_MEMORY_SIZE;
 }
 
 pub const CHIP8Mem = struct {
@@ -30,7 +30,7 @@ pub const CHIP8Mem = struct {
 
     // Memory clear
     pub fn clear(self: *Self) void {
-        for (self.memory) |*byte| {
+        for (&self.memory) |*byte| {
             byte.* = 0;
         }
     }

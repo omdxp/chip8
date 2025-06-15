@@ -5,9 +5,17 @@ const CHIP8 = @import("chip8.zig").CHIP8;
 
 pub fn main() !void {
     var chip8: CHIP8 = undefined;
-    chip8.registers.v[0x0f] = 50;
-    try chip8.memory.set(50, 'A');
-    std.debug.print("Memory at index 50: {c}\n", .{try chip8.memory.get(50)});
+    chip8.registers.sp = 0;
+    chip8.push(0xff) catch |err| {
+        std.debug.print("Error pushing to stack: {}\n", .{err});
+    };
+    const popped_value = chip8.pop() catch |err| {
+        std.debug.print("Error popping from stack: {}\n", .{err});
+        return err;
+    };
+    std.debug.print("Popped value: 0x{x}\n", .{popped_value});
+    chip8.reset();
+    std.debug.print("CHIP-8 state reset.\n", .{});
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
     const window = SDL.SDL_CreateWindow(
         config.EMULATOR_WINDOW_TITLE,
