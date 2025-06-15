@@ -10,6 +10,13 @@ pub const CHIP8KB = struct {
 
     const Self = @This();
 
+    // Initialize the CHIP-8 keypad
+    pub fn init() Self {
+        return Self{
+            .keys = [_]bool{false} ** config.CHIP8_NUM_KEYS,
+        };
+    }
+
     // Set a key state
     pub fn set_key(self: *Self, key: u8, pressed: bool) !void {
         if (!is_key_in_bounds(key)) {

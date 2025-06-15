@@ -12,7 +12,7 @@ const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
 };
 
 pub fn main() !void {
-    var chip8: CHIP8 = undefined;
+    var chip8: CHIP8 = .init();
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
     const window = SDL.SDL_CreateWindow(
         config.EMULATOR_WINDOW_TITLE,

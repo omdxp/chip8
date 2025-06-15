@@ -10,6 +10,13 @@ pub const CHIP8Mem = struct {
 
     const Self = @This();
 
+    // Initialize the CHIP-8 memory
+    pub fn init() Self {
+        return Self{
+            .memory = [_]u8{0} ** config.CHIP8_MEMORY_SIZE,
+        };
+    }
+
     // Memory set
     pub fn set(self: *Self, index: usize, value: u8) !void {
         if (!is_memory_in_bounds(index)) {

@@ -20,4 +20,16 @@ pub const CHIP8Regs = struct {
     sp: u8 = 0,
 
     const Self = @This();
+
+    // Initialize the CHIP-8 registers
+    pub fn init() Self {
+        return Self{
+            .v = [_]u8{0} ** config.CHIP8_NUM_REGISTERS,
+            .i = 0,
+            .delay_timer = config.CHIP8_TIMER_INITIAL,
+            .sound_timer = config.CHIP8_TIMER_INITIAL,
+            .pc = config.CHIP8_PC_INITIAL,
+            .sp = 0,
+        };
+    }
 };

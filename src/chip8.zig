@@ -20,6 +20,16 @@ pub const CHIP8 = struct {
 
     const Self = @This();
 
+    // Initialize the CHIP-8 state
+    pub fn init() Self {
+        return Self{
+            .memory = .init(),
+            .registers = .init(),
+            .stack = .init(),
+            .keypad = .init(),
+        };
+    }
+
     // Push to stack
     pub fn push(self: *Self, value: u16) !void {
         if (!stack_in_bounds(self.registers.sp)) {
