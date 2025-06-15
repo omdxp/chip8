@@ -3,6 +3,7 @@ const CHIP8Mem = @import("chip8mem.zig").CHIP8Mem;
 const CHIP8Regs = @import("chip8regs.zig").CHIP8Regs;
 const CHIP8Stack = @import("chip8stack.zig").CHIP8Stack;
 const stack_in_bounds = @import("chip8stack.zig").is_stack_in_bounds;
+const CHIP8KB = @import("chip8kb.zig").CHIP8KB;
 
 pub const CHIP8 = struct {
     // Memory
@@ -13,6 +14,9 @@ pub const CHIP8 = struct {
 
     // Stack
     stack: CHIP8Stack,
+
+    // Keypad
+    keypad: CHIP8KB,
 
     const Self = @This();
 

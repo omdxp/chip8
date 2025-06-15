@@ -18,5 +18,8 @@ pub const CHIP8_WINDOW_MULTIPLIER: usize = 10;
 // Initial value for timers
 pub const CHIP8_TIMER_INITIAL: u8 = 60;
 
+// Total number of keys
+pub const CHIP8_NUM_KEYS: usize = 16;
+
 // Emulator title
 pub const EMULATOR_WINDOW_TITLE: [*c]const u8 = "Chip8 Emulator";

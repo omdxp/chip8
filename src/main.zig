@@ -2,20 +2,17 @@ const std = @import("std");
 const SDL = @import("sdl2");
 const config = @import("config.zig");
 const CHIP8 = @import("chip8.zig").CHIP8;
+const CHIP8KB = @import("chip8kb.zig").CHIP8KB;
+
+const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
+    SDL.SDLK_0, SDL.SDLK_1, SDL.SDLK_2, SDL.SDLK_3,
+    SDL.SDLK_4, SDL.SDLK_5, SDL.SDLK_6, SDL.SDLK_7,
+    SDL.SDLK_8, SDL.SDLK_9, SDL.SDLK_a, SDL.SDLK_b,
+    SDL.SDLK_c, SDL.SDLK_d, SDL.SDLK_e, SDL.SDLK_f,
+};
 
 pub fn main() !void {
     var chip8: CHIP8 = undefined;
-    chip8.registers.sp = 0;
-    chip8.push(0xff) catch |err| {
-        std.debug.print("Error pushing to stack: {}\n", .{err});
-    };
-    const popped_value = chip8.pop() catch |err| {
-        std.debug.print("Error popping from stack: {}\n", .{err});
-        return err;
-    };
-    std.debug.print("Popped value: 0x{x}\n", .{popped_value});
-    chip8.reset();
-    std.debug.print("CHIP-8 state reset.\n", .{});
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
     const window = SDL.SDL_CreateWindow(
         config.EMULATOR_WINDOW_TITLE,
@@ -37,8 +34,33 @@ pub fn main() !void {
     while (true) {
         var event: SDL.SDL_Event = undefined;
         while (SDL.SDL_PollEvent(&event) != 0) {
-            if (event.type == SDL.SDL_QUIT) {
-                return;
+            switch (event.type) {
+                SDL.SDL_QUIT => {
+                    return;
+                },
+                SDL.SDL_KEYDOWN => {
+                    const key = event.key.keysym.sym;
+                    const vkey = CHIP8KB.get_key_map(&keypad_map, @intCast(key)) catch |err| {
+                        std.debug.print("Error getting key map: {}\n", .{err});
+                        continue;
+                    };
+                    chip8.keypad.key_down(vkey) catch |err| {
+                        std.debug.print("Error setting key down: {}\n", .{err});
+                    };
+                },
+                SDL.SDL_KEYUP => {
+                    const key = event.key.keysym.sym;
+                    const vkey = CHIP8KB.get_key_map(&keypad_map, @intCast(key)) catch |err| {
+                        std.debug.print("Error getting key map: {}\n", .{err});
+                        continue;
+                    };
+                    chip8.keypad.key_up(vkey) catch |err| {
+                        std.debug.print("Error setting key up: {}\n", .{err});
+                    };
+                },
+                else => {
+                    // Ignore other events
+                },
             }
         }
         _ = SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
