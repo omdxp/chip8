@@ -1,14 +1,15 @@
 const std = @import("std");
 const SDL = @import("sdl2");
+const config = @import("config.zig");
 
 pub fn main() !void {
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
     const window = SDL.SDL_CreateWindow(
-        "Chip8 Emulator",
+        config.EMULATOR_WINDOW_TITLE,
         SDL.SDL_WINDOWPOS_UNDEFINED,
         SDL.SDL_WINDOWPOS_UNDEFINED,
-        640,
-        480,
+        config.CHIP8_WIDTH * config.CHIP8_WINDOW_MULTIPLIER,
+        config.CHIP8_HEIGHT * config.CHIP8_WINDOW_MULTIPLIER,
         SDL.SDL_WINDOW_SHOWN,
     );
     defer SDL.SDL_DestroyWindow(window);
