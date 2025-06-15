@@ -1,0 +1,17 @@
+.{
+    .name = .chip8,
+    .version = "0.0.0",
+    .dependencies = .{
+        .sdl = .{
+            .url = "git+https://github.com/ikskuh/SDL.zig#424ff5f9245ef352e4c508c77ddaeed2f46bd605",
+            .hash = "SDL2-0.0.0-yMCQigakBADGJHtb2ljt13P_cCnG8Y819HRnIibNVPFk",
+        },
+    },
+    .fingerprint = 0xa61914abe558dab9, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.15.0-dev.828+3ce8d19f7",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
