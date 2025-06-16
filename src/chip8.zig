@@ -4,6 +4,7 @@ const CHIP8Regs = @import("chip8regs.zig").CHIP8Regs;
 const CHIP8Stack = @import("chip8stack.zig").CHIP8Stack;
 const stack_in_bounds = @import("chip8stack.zig").is_stack_in_bounds;
 const CHIP8KB = @import("chip8kb.zig").CHIP8KB;
+const CHIP8Scr = @import("chip8scr.zig").CHIP8Scr;
 
 const CHIP8_DEFAULT_CHARACTER_SET: [16 * 5]u8 = [_]u8{
     0xf0, 0x90, 0x90, 0x90, 0xf0, // 0
@@ -37,6 +38,9 @@ pub const CHIP8 = struct {
     // Keypad
     keypad: CHIP8KB,
 
+    // Screen
+    screen: CHIP8Scr,
+
     const Self = @This();
 
     // Initialize the CHIP-8 state
@@ -52,6 +56,7 @@ pub const CHIP8 = struct {
             .registers = .init(),
             .stack = .init(),
             .keypad = .init(),
+            .screen = undefined,
         };
     }
 

@@ -13,6 +13,11 @@ const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
 
 pub fn main() !void {
     var chip8: CHIP8 = try .init();
+    // set some pixels to test
+    try chip8.screen.set_pixel(0, 0, true);
+    try chip8.screen.set_pixel(1, 1, true);
+    try chip8.screen.set_pixel(2, 2, true);
+    try chip8.screen.set_pixel(3, 3, true);
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
     const window = SDL.SDL_CreateWindow(
         config.EMULATOR_WINDOW_TITLE,
@@ -65,14 +70,20 @@ pub fn main() !void {
         }
         _ = SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
         _ = SDL.SDL_RenderClear(renderer);
-        _ = SDL.SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        var rect = SDL.SDL_Rect{
-            .x = 0,
-            .y = 0,
-            .w = 40,
-            .h = 40,
-        };
-        _ = SDL.SDL_RenderFillRect(renderer, &rect);
+        _ = SDL.SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+        for (0..config.CHIP8_WIDTH) |x| {
+            for (0..config.CHIP8_HEIGHT) |y| {
+                if (chip8.screen.is_pixel_set(x, y)) {
+                    const rect = SDL.SDL_Rect{
+                        .x = @intCast(x * config.CHIP8_WINDOW_MULTIPLIER),
+                        .y = @intCast(y * config.CHIP8_WINDOW_MULTIPLIER),
+                        .w = @intCast(config.CHIP8_WINDOW_MULTIPLIER),
+                        .h = @intCast(config.CHIP8_WINDOW_MULTIPLIER),
+                    };
+                    _ = SDL.SDL_RenderFillRect(renderer, &rect);
+                }
+            }
+        }
         SDL.SDL_RenderPresent(renderer);
     }
 }
