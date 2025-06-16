@@ -6,7 +6,7 @@ const CHIP8KB = @import("chip8kb.zig").CHIP8KB;
 const beep = @import("beep.zig").beep;
 const clap = @import("clap");
 
-const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
+pub const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
     SDL.SDLK_0, SDL.SDLK_1, SDL.SDLK_2, SDL.SDLK_3,
     SDL.SDLK_4, SDL.SDLK_5, SDL.SDLK_6, SDL.SDLK_7,
     SDL.SDLK_8, SDL.SDLK_9, SDL.SDLK_a, SDL.SDLK_b,
@@ -58,7 +58,7 @@ pub fn main() !void {
     }
 
     var chip8: CHIP8 = try .init();
-    chip8.registers.delay_timer = 0;
+    // chip8.registers.delay_timer = 0;
     chip8.registers.sound_timer = 0;
     chip8.load_program(program_data) catch |err| {
         std.debug.print("Error loading program: {}\n", .{err});
@@ -133,12 +133,12 @@ pub fn main() !void {
         SDL.SDL_RenderPresent(renderer);
 
         if (chip8.registers.delay_timer > 0) {
-            std.time.sleep(std.time.ns_per_s / 60); // Wait for 1/60th of a second
+            std.time.sleep(10);
             chip8.registers.delay_timer -= 1;
         }
 
         if (chip8.registers.sound_timer > 0) {
-            _ = beep(15000, 100 * @as(c_int, chip8.registers.sound_timer)); // Beep at 15kHz for sound timer
+            _ = beep(15000, 10 * @as(c_int, chip8.registers.sound_timer)); // Beep at 15kHz for sound timer
             chip8.registers.sound_timer = 0;
         }
 
@@ -146,10 +146,10 @@ pub fn main() !void {
             std.debug.print("Error reading opcode: {}\n", .{err});
             return err;
         };
+        chip8.registers.pc += 2;
         chip8.execute(opcode) catch |err| {
             std.debug.print("Error executing opcode: {}\n", .{err});
             return err;
         };
-        chip8.registers.pc += 2; // Move to the next opcode
     }
 }

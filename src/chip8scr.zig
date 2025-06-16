@@ -12,7 +12,7 @@ pub const CHIP8Scr = struct {
 
     // Clear the screen
     pub fn clear(self: *Self) void {
-        for (self.pixels) |*row| {
+        for (&self.pixels) |*row| {
             for (row) |*pixel| {
                 pixel.* = false;
             }

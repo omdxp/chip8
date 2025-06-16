@@ -4,6 +4,9 @@ pub const CHIP8_MEMORY_SIZE: usize = 4096;
 // Number of registers
 pub const CHIP8_NUM_REGISTERS: usize = 16;
 
+// VF register index
+pub const CHIP8_VF_INDEX: usize = 0x0F;
+
 // Program counter initial value
 pub const CHIP8_PC_INITIAL: u16 = 0x200;
 

@@ -1,4 +1,6 @@
 const config = @import("config.zig");
+const SDL = @import("sdl2");
+const keypad_map = @import("main.zig").keypad_map;
 
 inline fn is_key_in_bounds(key: u8) bool {
     return key < config.CHIP8_NUM_KEYS;
@@ -66,5 +68,21 @@ pub const CHIP8KB = struct {
         for (&self.keys) |*key| {
             key.* = false;
         }
+    }
+
+    // Wait for a key press
+    pub fn wait_for_key_press(self: *Self) !u8 {
+        var event: SDL.SDL_Event = undefined;
+        while (SDL.SDL_WaitEvent(&event) != 0) {
+            if (event.type == SDL.SDL_KEYDOWN) {
+                const key = event.key.keysym.sym;
+                const vkey = try Self.get_key_map(&keypad_map, @intCast(key));
+                try self.key_down(vkey);
+                return vkey;
+            } else if (event.type == SDL.SDL_QUIT) {
+                return error.QuitRequested; // Handle quit event
+            }
+        }
+        return error.NoKeyPressed; // or some error handling
     }
 };
