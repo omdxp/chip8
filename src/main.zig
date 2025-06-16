@@ -3,6 +3,7 @@ const SDL = @import("sdl2");
 const config = @import("config.zig");
 const CHIP8 = @import("chip8.zig").CHIP8;
 const CHIP8KB = @import("chip8kb.zig").CHIP8KB;
+const beep = @import("beep.zig").beep;
 
 const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
     SDL.SDLK_0, SDL.SDLK_1, SDL.SDLK_2, SDL.SDLK_3,
@@ -13,7 +14,7 @@ const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
 
 pub fn main() !void {
     var chip8: CHIP8 = try .init();
-    chip8.registers.delay_timer = 255; // Set delay timer to 255 for testing
+    chip8.registers.sound_timer = 30; // Set sound timer to 30 for testing
     // draw sprite at (0, 0) with width 8 and height 5
     _ = try chip8.screen.draw_sprite(32, 10, &chip8.memory.memory[0x0a], 5);
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
@@ -87,7 +88,11 @@ pub fn main() !void {
         if (chip8.registers.delay_timer > 0) {
             std.time.sleep(std.time.ns_per_s / 60); // Wait for 1/60th of a second
             chip8.registers.delay_timer -= 1;
-            std.debug.print("Delay Timer: {}\n", .{chip8.registers.delay_timer});
+        }
+
+        if (chip8.registers.sound_timer > 0) {
+            _ = beep(15000, 100 * @as(c_int, chip8.registers.sound_timer)); // Beep at 15kHz for sound timer
+            chip8.registers.sound_timer = 0;
         }
     }
 }
