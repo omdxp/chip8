@@ -13,6 +13,7 @@ const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
 
 pub fn main() !void {
     var chip8: CHIP8 = try .init();
+    chip8.registers.delay_timer = 255; // Set delay timer to 255 for testing
     // draw sprite at (0, 0) with width 8 and height 5
     _ = try chip8.screen.draw_sprite(32, 10, &chip8.memory.memory[0x0a], 5);
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
@@ -82,5 +83,11 @@ pub fn main() !void {
             }
         }
         SDL.SDL_RenderPresent(renderer);
+
+        if (chip8.registers.delay_timer > 0) {
+            std.time.sleep(std.time.ns_per_s / 60); // Wait for 1/60th of a second
+            chip8.registers.delay_timer -= 1;
+            std.debug.print("Delay Timer: {}\n", .{chip8.registers.delay_timer});
+        }
     }
 }
