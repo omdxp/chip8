@@ -36,4 +36,32 @@ pub const CHIP8Scr = struct {
         }
         return self.pixels[y][x];
     }
+
+    // Draw sprite at (x, y) with width and height
+    pub fn draw_sprite(self: *Self, x: usize, y: usize, sprite: [*c]const u8, nbytes: usize) !bool {
+        if (!is_screen_in_bounds(x, y)) {
+            // Handle out of bounds access
+            return error.OutOfBounds; // or some error handling
+        }
+
+        var collision = false;
+        for (0..nbytes) |i| {
+            const byte = sprite[i];
+            for (0..8) |bit| {
+                if ((byte & (@as(u8, 0b10000000) >> @intCast(bit))) != 0) {
+                    const pixel_x = (x + bit) % config.CHIP8_WIDTH;
+                    const pixel_y = (y + i) % config.CHIP8_HEIGHT;
+
+                    // Check for collision
+                    if (self.is_pixel_set(pixel_x, pixel_y)) {
+                        collision = true;
+                    }
+
+                    // Set the pixel
+                    try self.set_pixel(pixel_x, pixel_y, !self.is_pixel_set(pixel_x, pixel_y));
+                }
+            }
+        }
+        return collision;
+    }
 };

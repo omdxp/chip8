@@ -13,11 +13,8 @@ const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
 
 pub fn main() !void {
     var chip8: CHIP8 = try .init();
-    // set some pixels to test
-    try chip8.screen.set_pixel(0, 0, true);
-    try chip8.screen.set_pixel(1, 1, true);
-    try chip8.screen.set_pixel(2, 2, true);
-    try chip8.screen.set_pixel(3, 3, true);
+    // draw sprite at (0, 0) with width 8 and height 5
+    _ = try chip8.screen.draw_sprite(32, 10, &chip8.memory.memory[0x0a], 5);
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
     const window = SDL.SDL_CreateWindow(
         config.EMULATOR_WINDOW_TITLE,
