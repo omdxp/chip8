@@ -4,6 +4,7 @@ const config = @import("config.zig");
 const CHIP8 = @import("chip8.zig").CHIP8;
 const CHIP8KB = @import("chip8kb.zig").CHIP8KB;
 const beep = @import("beep.zig").beep;
+const clap = @import("clap");
 
 const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
     SDL.SDLK_0, SDL.SDLK_1, SDL.SDLK_2, SDL.SDLK_3,
@@ -13,10 +14,56 @@ const keypad_map: [config.CHIP8_NUM_KEYS]u8 = [_]u8{
 };
 
 pub fn main() !void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+
+    const params = comptime clap.parseParamsComptime(
+        \\-h, --help  Display this help and exit.
+        \\-p, --program <string>  Path to the CHIP-8 program file.
+        \\--version  Display version information and exit.
+    );
+    var diag = clap.Diagnostic{};
+    var res = clap.parse(clap.Help, &params, clap.parsers.default, .{
+        .diagnostic = &diag,
+        .allocator = gpa.allocator(),
+    }) catch |err| {
+        diag.report(std.io.getStdErr().writer(), err) catch {};
+        return err;
+    };
+    defer res.deinit();
+
+    var program_data: []const u8 = undefined;
+    if (res.args.program) |program_path| {
+        const program_file = std.fs.cwd().openFile(program_path, .{ .mode = .read_only }) catch |err| {
+            std.debug.print("Error opening program file: {}\n", .{err});
+            return err;
+        };
+        defer program_file.close();
+
+        program_data = program_file.readToEndAlloc(gpa.allocator(), 4096) catch |err| {
+            std.debug.print("Error reading program file: {}\n", .{err});
+            return err;
+        };
+    } else {
+        std.debug.print("No program specified. Use -p or --program to specify a CHIP-8 program file.\n", .{});
+        return error.NoProgramSpecified;
+    }
+    defer gpa.allocator().free(program_data);
+
+    for (program_data) |byte| {
+        if (byte > 0xFF) {
+            std.debug.print("Invalid byte in program data: {}\n", .{byte});
+            return error.InvalidProgramData;
+        }
+    }
+
     var chip8: CHIP8 = try .init();
-    chip8.registers.sound_timer = 30; // Set sound timer to 30 for testing
-    // draw sprite at (0, 0) with width 8 and height 5
-    _ = try chip8.screen.draw_sprite(32, 10, &chip8.memory.memory[0x0a], 5);
+    chip8.registers.delay_timer = 0;
+    chip8.registers.sound_timer = 0;
+    chip8.load_program(program_data) catch |err| {
+        std.debug.print("Error loading program: {}\n", .{err});
+        return err;
+    };
     _ = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
     const window = SDL.SDL_CreateWindow(
         config.EMULATOR_WINDOW_TITLE,
@@ -94,5 +141,15 @@ pub fn main() !void {
             _ = beep(15000, 100 * @as(c_int, chip8.registers.sound_timer)); // Beep at 15kHz for sound timer
             chip8.registers.sound_timer = 0;
         }
+
+        const opcode = chip8.memory.get_short(chip8.registers.pc) catch |err| {
+            std.debug.print("Error reading opcode: {}\n", .{err});
+            return err;
+        };
+        chip8.execute(opcode) catch |err| {
+            std.debug.print("Error executing opcode: {}\n", .{err});
+            return err;
+        };
+        chip8.registers.pc += 2; // Move to the next opcode
     }
 }

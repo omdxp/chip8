@@ -35,6 +35,17 @@ pub const CHIP8Mem = struct {
         return self.memory[index];
     }
 
+    // Memory get short
+    pub fn get_short(self: *const Self, index: usize) !u16 {
+        if (!is_memory_in_bounds(index) or !is_memory_in_bounds(index + 1)) {
+            // Handle out of bounds access
+            return error.OutOfBounds; // or some error handling
+        }
+        const high = try self.get(index);
+        const low = try self.get(index + 1);
+        return @as(u16, high) << 8 | @as(u16, low);
+    }
+
     // Memory clear
     pub fn clear(self: *Self) void {
         for (&self.memory) |*byte| {

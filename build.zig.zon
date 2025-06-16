@@ -6,6 +6,10 @@
             .url = "git+https://github.com/ikskuh/SDL.zig#424ff5f9245ef352e4c508c77ddaeed2f46bd605",
             .hash = "SDL2-0.0.0-yMCQigakBADGJHtb2ljt13P_cCnG8Y819HRnIibNVPFk",
         },
+        .clap = .{
+            .url = "git+https://github.com/Hejsil/zig-clap#cc5c6a5d71a317ed4b0ad776842d1d0655f72d0a",
+            .hash = "clap-0.10.0-oBajB7jkAQAZ4cKLlzkeV9mDu2yGZvtN2QuOyfAfjBij",
+        },
     },
     .fingerprint = 0xa61914abe558dab9, // Changing this has security and trust implications.
     .minimum_zig_version = "0.15.0-dev.828+3ce8d19f7",

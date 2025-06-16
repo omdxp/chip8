@@ -24,5 +24,8 @@ pub const CHIP8_NUM_KEYS: usize = 16;
 // Default character set load address
 pub const CHIP8_DEFAULT_CHARACTER_SET_ADDRESS: u16 = 0x00;
 
+// Program start address
+pub const CHIP8_PROGRAM_START_ADDRESS: u16 = 0x200;
+
 // Emulator title
 pub const EMULATOR_WINDOW_TITLE: [*c]const u8 = "Chip8 Emulator";

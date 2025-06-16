@@ -5,6 +5,11 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const clap = b.dependency("clap", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     const sdk = sdl.init(b, .{});
 
     const exe = b.addExecutable(.{
@@ -18,6 +23,7 @@ pub fn build(b: *std.Build) void {
 
     sdk.link(exe, .dynamic, sdl.Library.SDL2);
     exe.root_module.addImport("sdl2", sdk.getNativeModule());
+    exe.root_module.addImport("clap", clap.module("clap"));
 
     b.installArtifact(exe);
 

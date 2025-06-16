@@ -84,4 +84,33 @@ pub const CHIP8 = struct {
         self.registers = CHIP8Regs{};
         self.stack = CHIP8Stack{};
     }
+
+    // Execute an opcode
+    pub fn execute(self: *Self, opcode: u16) !void {
+        // Decode and execute the opcode
+        // This is a simplified example; actual implementation will vary
+        switch (opcode & 0xF000) {
+            0x0000 => {},
+            0x1000 => |addr| {
+                self.registers.pc = addr & 0x0FFF; // Jump to address
+            },
+            0x2000 => |addr| {
+                try self.push(self.registers.pc); // Call subroutine
+                self.registers.pc = addr & 0x0FFF;
+            },
+            // Add more opcodes as needed...
+            else => return error.InvalidOpcode, // Invalid opcode
+        }
+    }
+
+    // Load a program into memory
+    pub fn load_program(self: *Self, program: []const u8) !void {
+        if (program.len > self.memory.memory.len - config.CHIP8_PROGRAM_START_ADDRESS) {
+            return error.ProgramTooLarge; // or some error handling
+        }
+        for (0..program.len) |i| {
+            try self.memory.set(config.CHIP8_PROGRAM_START_ADDRESS + i, program[i]);
+        }
+        self.registers.pc = config.CHIP8_PROGRAM_START_ADDRESS; // Set the program counter to the start of the program
+    }
 };
