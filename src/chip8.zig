@@ -57,14 +57,14 @@ pub const CHIP8 = struct {
             .registers = .init(),
             .stack = .init(),
             .keypad = .init(),
-            .screen = undefined,
+            .screen = CHIP8Scr{ .pixels = [_][config.CHIP8_WIDTH]bool{[_]bool{false} ** config.CHIP8_WIDTH} ** config.CHIP8_HEIGHT },
         };
     }
 
     // Push to stack
     pub fn push(self: *Self, value: u16) !void {
         if (!stack_in_bounds(self.registers.sp)) {
-            return error.StackOverflow; // or some error handling
+            return error.StackOverflow;
         }
         self.stack.stack[self.registers.sp] = value;
         self.registers.sp += 1;
@@ -72,12 +72,11 @@ pub const CHIP8 = struct {
 
     // Pop from stack
     pub fn pop(self: *Self) !u16 {
-        if (!stack_in_bounds(self.registers.sp)) {
-            return error.StackUnderflow; // or some error handling
+        if (self.registers.sp == 0) {
+            return error.StackUnderflow;
         }
-        const res = self.stack.stack[self.registers.sp];
         self.registers.sp -= 1;
-        return res;
+        return self.stack.stack[self.registers.sp];
     }
 
     // Reset the CHIP-8 state
@@ -89,7 +88,6 @@ pub const CHIP8 = struct {
 
     // Execute an opcode
     pub fn execute(self: *Self, opcode: u16) !void {
-        std.debug.print("last opcode: {x}\n", .{opcode});
         switch (opcode) {
             // Clear the display
             0x00E0 => self.screen.clear(),
@@ -145,7 +143,7 @@ pub const CHIP8 = struct {
             0x6000 => self.registers.v[x] = kk,
             // 0x7XKK: Set Vx += KK
             0x7000 => {
-                self.registers.v[x] = @as(u8, self.registers.v[x] + kk);
+                self.registers.v[x] = @truncate(self.registers.v[x] +% kk);
             },
             // 0x8000 cases
             0x8000 => self.execute_extended_8000(opcode) catch |err| {
@@ -169,13 +167,13 @@ pub const CHIP8 = struct {
             },
             // 0xDXYN: Draw sprite at (Vx, Vy) with height N
             0xD000 => {
-                const sprite = self.memory.get(self.registers.i) catch |err| {
-                    return err; // Handle memory access error
-                };
+                const start = self.registers.i;
+                const end = start + nibble;
+                const sprite = self.memory.memory[start..end];
                 const collision = self.screen.draw_sprite(
                     @intCast(self.registers.v[x]),
                     @intCast(self.registers.v[y]),
-                    &sprite,
+                    sprite.ptr,
                     nibble,
                 ) catch |err| {
                     return err; // Handle screen draw error
@@ -282,12 +280,12 @@ pub const CHIP8 = struct {
             0x0004 => {
                 const sum = @as(u16, self.registers.v[x]) + @as(u16, self.registers.v[y]);
                 self.registers.v[config.CHIP8_VF_INDEX] = if (sum > 255) 1 else 0;
-                self.registers.v[x] = @intCast(sum);
+                self.registers.v[x] = @truncate(sum);
             },
             // 0x8XY5: Set Vx -= Vy, set VF = NOT borrow
             0x0005 => {
                 self.registers.v[config.CHIP8_VF_INDEX] = if (self.registers.v[x] > self.registers.v[y]) 1 else 0;
-                self.registers.v[x] -= self.registers.v[y];
+                self.registers.v[x] = @truncate(self.registers.v[x] -% self.registers.v[y]);
             },
             // 0x8XY6: Set Vx = Vx SHR 1, set VF = LSB of Vx before shift
             0x0006 => {

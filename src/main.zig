@@ -117,8 +117,8 @@ pub fn main() !void {
         _ = SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
         _ = SDL.SDL_RenderClear(renderer);
         _ = SDL.SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
-        for (0..config.CHIP8_WIDTH) |x| {
-            for (0..config.CHIP8_HEIGHT) |y| {
+        for (0..config.CHIP8_HEIGHT) |y| {
+            for (0..config.CHIP8_WIDTH) |x| {
                 if (chip8.screen.is_pixel_set(x, y)) {
                     const rect = SDL.SDL_Rect{
                         .x = @intCast(x * config.CHIP8_WINDOW_MULTIPLIER),
@@ -132,13 +132,13 @@ pub fn main() !void {
         }
         SDL.SDL_RenderPresent(renderer);
 
+        // --- Timer and emulation speed fix ---
+        // Use a 60Hz timer for delay and sound timers
         if (chip8.registers.delay_timer > 0) {
-            std.time.sleep(10);
             chip8.registers.delay_timer -= 1;
         }
-
         if (chip8.registers.sound_timer > 0) {
-            _ = beep(15000, 10 * @as(c_int, chip8.registers.sound_timer)); // Beep at 15kHz for sound timer
+            _ = beep(15000, 10 * @as(c_int, chip8.registers.sound_timer));
             chip8.registers.sound_timer = 0;
         }
 
@@ -151,5 +151,13 @@ pub fn main() !void {
             std.debug.print("Error executing opcode: {}\n", .{err});
             return err;
         };
+
+        // Sleep to maintain ~60Hz (DISABLED for max speed)
+        // const frame_time = std.time.milliTimestamp() - frame_start;
+        // const sleep_ns: i64 = (16 - frame_time) * 1_000_000;
+        // if (sleep_ns > 0) {
+        //     const sleep_ns_u64: u64 = @intCast(sleep_ns);
+        //     std.time.sleep(sleep_ns_u64);
+        // }
     }
 }
